@@ -91,8 +91,10 @@ def load_model(model):
 
 
 def main(args):
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
     with tf.Graph().as_default():
-        with tf.Session() as sess:
+        with tf.Session(config=config) as sess:
 
             # Setup models
             mtcnn = detect_and_align.create_mtcnn(sess, None)
