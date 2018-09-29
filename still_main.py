@@ -110,16 +110,18 @@ def main(args):
 #            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
 #            cap = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
 #            frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
+            
             show_landmarks = False
-            show_bb = False
+            show_bb = True
             show_id = True
-            show_fps = False
-            i = 0
-            while(i = 0):
+            show_fps = True 
+            i = 0                                                                #Count for images
+            while(i < 2):                                                        #Recognition stops at last image
+                
                 start = time.time()
-#                _, frame = cap.read()
-		-, frame = cv2.imread('pic0.png')
+#                _, frame = cap.read()                                           #Frame from video feed is deactivated
+                frame = cv2.imread('more_pics/pic{}.png'.format(i))              #Reads the images that are to be scanned by the FR model
+                frame_height = frame.shape[0]                                    #Height of the image
 
                 # Locate faces and landmarks in frame
                 face_patches, padded_bounding_boxes, landmarks = detect_and_align.detect_faces(frame, mtcnn)
@@ -135,7 +137,7 @@ def main(args):
                     for bb, landmark, matching_id, dist in zip(padded_bounding_boxes, landmarks, matching_ids, matching_distances):
                         if matching_id is None:
                             matching_id = 'Unknown'
-                            print('Unknown! Couldn\'t fint match.')
+                            print('Unknown! Couldn\'t find match.')
                         else:
                             print('Hi %s! Distance: %1.4f' % (matching_id, dist))
 
@@ -162,7 +164,7 @@ def main(args):
                     font = cv2.FONT_HERSHEY_SIMPLEX
                     cv2.putText(frame, str(fps), (0, int(frame_height) - 5), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
 
-                cv2.imshow('frame', frame)
+#                cv2.imshow('frame', frame)
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
@@ -175,9 +177,9 @@ def main(args):
                     show_id = not show_id
                 elif key == ord('f'):
                     show_fps = not show_fps
-		i += 1
-
-            cap.release()
+                cv2.imwrite('more_pics/new{}.png'.format(i), frame)       #Writes the image that was scanned     
+                i += 1
+#            cap.release()
             cv2.destroyAllWindows()
 
 
