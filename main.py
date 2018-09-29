@@ -119,7 +119,7 @@ def main(args):
             while(True):
                 start = time.time()
                 _, frame = cap.read()
-
+                
                 # Locate faces and landmarks in frame
                 face_patches, padded_bounding_boxes, landmarks = detect_and_align.detect_faces(frame, mtcnn)
 
@@ -134,7 +134,7 @@ def main(args):
                     for bb, landmark, matching_id, dist in zip(padded_bounding_boxes, landmarks, matching_ids, matching_distances):
                         if matching_id is None:
                             matching_id = 'Unknown'
-                            print('Unknown! Couldn\'t fint match.')
+                            print('Unknown! Couldn\'t find match.')
                         else:
                             print('Hi %s! Distance: %1.4f' % (matching_id, dist))
 
