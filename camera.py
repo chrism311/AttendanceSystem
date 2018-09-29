@@ -1,9 +1,15 @@
 import numpy as np
 import cv2
+import sys
 
 usb_camera ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
 cap = cv2.VideoCapture(usb_camera, cv2.CAP_GSTREAMER)
 i = 0
+
+if len(path) < 2:
+	print("ERROR: Specify the directory path of storage.")
+	quit()
+path = sys.argv[1]
 
 while True:
 	ret, frame = cap.read()
@@ -11,7 +17,7 @@ while True:
 	key = cv2.waitKey(1)
 
 	if key == ord('c'):
-		cv2.imwrite('pic{}.png'.format(i), frame)
+		cv2.imwrite(path + 'pic{}.png'.format(i), frame)
 		i += 1
 
 	elif key == ord('q'):
