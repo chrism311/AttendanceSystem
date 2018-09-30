@@ -9,7 +9,8 @@ path = sys.argv[1]
 width = sys.argv[2]
 height = sys.argv[3]
 
-usb_camera ="v4l2src device=/dev/video1 ! video/x-raw, width=(int){}, height=(int){}, format=(string)RGB ! videoconvert ! appsink".format(width, height)
+gtx_camera ="nvcamerasrc !video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, format=(string)I420, framerate=(fraction)120/1 ! nvvidconv ! video/x-raw, width=(int){}, height=(int){}, format=(string)BGRx ! videoconvert ! appsink".format(width, height)
+usb_camera ="v4l2src device=/dev/video1 ! video/x-raw, width=(int){}, height=(int){}, format=(string)RGB, framerate=(fraction)30/1 ! videoconvert ! appsink".format(width, height)
 cap = cv2.VideoCapture(usb_camera, cv2.CAP_GSTREAMER)
 i = 0
 
@@ -21,7 +22,7 @@ while True:
 	if key == ord('c'):
 		cv2.imwrite(path + 'pic{}.png'.format(i), frame)
 		i += 1
-		print(frame.shape)
+		
 	elif key == ord('q'):
 		break
 
