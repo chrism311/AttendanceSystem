@@ -107,8 +107,8 @@ def main(args):
             # Load anchor IDs
             id_data = IdData(args.id_folder[0], mtcnn, sess, embeddings, images_placeholder, phase_train_placeholder, args.threshold)
 
-            gst_tx2 ="nvcamerasrc !video/x-raw(memory:NVMM), width=(int)2592, height=(int)1458, format=(string)I420, framerate=(fraction)40/1 ! nvvidconv ! video/x-raw, width=(int)320, height=(int)240, format=(string)BGRx ! videoconvert ! appsink"
-            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
+            gst_tx2 ="nvcamerasrc !video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, format=(string)I420, framerate=(fraction)120/1 ! nvvidconv ! video/x-raw, width=(int)640, height=(int)480, format=(string)BGRx ! videoconvert ! appsink"
+            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)640, height=(int)480, format=(string)RGB ! videoconvert ! appsink"
             cap = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
             frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
@@ -161,7 +161,7 @@ def main(args):
                     font = cv2.FONT_HERSHEY_SIMPLEX
                     cv2.putText(frame, str(fps), (0, int(frame_height) - 5), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
 
-                cv2.imshow('frame', frame)
+                cv2.imshow('Frame', frame)
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
