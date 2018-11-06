@@ -116,7 +116,7 @@ def main(args):
             show_id = True
             show_fps = True 
             i = 0                                                                #Count for images
-            while(i < 2):                                                        #Recognition stops at last image
+            while(i < 1):                                                        #Recognition stops at last image
                 
                 start = time.time()
 #                _, frame = cap.read()                                           #Frame from video feed is deactivated

@@ -107,9 +107,10 @@ def main(args):
             # Load anchor IDs
             id_data = IdData(args.id_folder[0], mtcnn, sess, embeddings, images_placeholder, phase_train_placeholder, args.threshold)
 
-            gst_tx2 ="nvcamerasrc !video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, format=(string)I420, framerate=(fraction)120/1 ! nvvidconv ! video/x-raw, width=(int)640, height=(int)480, format=(string)BGRx ! videoconvert ! appsink"
-            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)640, height=(int)480, format=(string)RGB ! videoconvert ! appsink"
-            cap = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
+            video = 'output1.avi'
+            gst_tx2 ="nvarguscamerasrc !video/x-raw(memory:NVMM), width=(int)640, height=(int)360, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
+            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)RGB ! videoconvert ! appsink"
+            cap = cv2.VideoCapture(video, cv2.CAP_GSTREAMER)
             frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
             show_landmarks = False
