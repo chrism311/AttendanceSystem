@@ -1,6 +1,7 @@
 from sklearn.metrics.pairwise import pairwise_distances
 from tensorflow.python.platform import gfile
 from scipy import misc
+from collections import defaultdict
 import tensorflow as tf
 import numpy as np
 import detect_and_align
@@ -117,6 +118,9 @@ def main(args):
             show_bb = False
             show_id = True
             show_fps = False
+
+            present = defaultdict(int)
+
             while(True):
                 start = time.time()
                 _, frame = cap.read()
@@ -138,6 +142,7 @@ def main(args):
                             print('Unknown! Couldn\'t find match.')
                         else:
                             print('Hi %s! Distance: %1.4f' % (matching_id, dist))
+                            present[matching_id] += 1
 
                         if show_id:
                             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -166,6 +171,7 @@ def main(args):
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
+                    print present.items()
                     break
                 elif key == ord('l'):
                     show_landmarks = not show_landmarks
