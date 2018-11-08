@@ -171,7 +171,7 @@ def main(args):
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
-                    print present.items()
+                    print(present.items())
                     break
                 elif key == ord('l'):
                     show_landmarks = not show_landmarks
