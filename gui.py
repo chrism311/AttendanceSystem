@@ -1,8 +1,15 @@
 import tkinter as tk
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-top = tk.Tk()
+app = QApplication([])
+window = QWidget()
+layout = QVBoxLayout()
+layout.addWidget(QPushButton('Start Program'))
+window.setLayout(layout)
+window.show()
+app.exec_()
 
-top.mainloop()
 
 
