@@ -5,7 +5,6 @@ from collections import defaultdict
 import tensorflow as tf
 import numpy as np
 import detect_and_align
-import argparse
 import time
 import cv2
 import os
@@ -79,6 +78,13 @@ class IdData():
         return matching_ids, matching_distances
 
 
+class arguments():
+    def __init__(self, model, id_folder, threshold):
+        self.model = model
+        self.id_folder = id_folder
+        self.threshold = threshold
+
+
 def load_model(model):
     model_exp = os.path.expanduser(model)
     if (os.path.isfile(model_exp)):
@@ -106,12 +112,12 @@ def main(args):
             phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
 
             # Load anchor IDs
-            id_data = IdData(args.id_folder[0], mtcnn, sess, embeddings, images_placeholder, phase_train_placeholder, args.threshold)
+            id_data = IdData(args.id_folder, mtcnn, sess, embeddings, images_placeholder, phase_train_placeholder, float(args.threshold))
 
             video = 'output1.avi'
             gst_tx2 ="nvarguscamerasrc !video/x-raw(memory:NVMM), width=(int)640, height=(int)360, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
             gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)RGB ! videoconvert ! appsink"
-            cap = cv2.VideoCapture(video, cv2.CAP_GSTREAMER)
+            cap = cv2.VideoCapture(0)
             frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
             show_landmarks = False
@@ -187,10 +193,5 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('model', type=str, help='Path to model protobuf (.pb) file')
-    parser.add_argument('id_folder', type=str, nargs='+', help='Folder containing ID folders')
-    parser.add_argument('-t', '--threshold', type=float,
-        help='Distance threshold defining an id match', default=1.2)
-    main(parser.parse_args())
+    args = arguments('./model/20170512-110547/20170512-110547.pb', './ids/', '1.0')
+    main(args)
