@@ -23,9 +23,9 @@ class mainWindow(QWidget):
 		layout.addWidget(self.btnStop, 1, 1, 2, 1)
 
 		#'Create New Class' button
-		self.newClass = QPushButton("Create New Class")
-		self.newClass.clicked.connect(self.classInfo)
-		layout.addWidget(self.newClass, 1, 1)
+		self.newCourse = QPushButton("Create New Course")
+		self.newCourse.clicked.connect(self.courseInfo)
+		layout.addWidget(self.newCourse, 1, 1)
 
 		#'Add Student' button
 		self.addStud = QPushButton("Add Student")
@@ -52,12 +52,13 @@ class mainWindow(QWidget):
 		self.course = self.db.currentText()
 
 	#Window to enter course info
-	def classInfo(self):
-		class_name, ok = QInputDialog.getText(self, 'New Class', 'Class Name:')
+	def courseInfo(self):
+		course_name, ok = QInputDialog.getText(self, 'New Course', 'Course Name:')
 		self.whole_path = os.getcwd()
-		self.current_dir = self.whole_path + '/ids/' + class_name
+		self.current_dir = self.whole_path + '/ids/' + course_name
 		os.mkdir(self.current_dir)
-	
+
+		#If 'Ok' is clicked, student window is opened to gather their info	
 		if ok:
 			self.studentWindow()
 
@@ -80,14 +81,25 @@ class studProfile(QWidget):
 	
 		layout = QGridLayout()
 
+		self.firstName = QLineEdit()
+		self.lastName = QLineEdit()
+		self.fnameLabel = QLabel()
+		self.lnameLabel = QLabel()
+		self.fnameLabel.setText('First Name:')
+		self.lnameLabel.setText('Last Name:')
+		layout.addWidget(self.firstName, 0, 1)
+		layout.addWidget(self.lastName, 1, 1)
+		layout.addWidget(self.fnameLabel, 0, 0)
+		layout.addWidget(self.lnameLabel, 1, 0)
+
 		#'Continue' button that brings up camera
 		self.contBtn = QPushButton('Continue')
 		self.contBtn.clicked.connect(self.cont)
-		layout.addWidget(self.contBtn, 0,0)
+		layout.addWidget(self.contBtn, 2,0)
 
 		self.cnlBtn = QPushButton('Cancel')
 		self.cnlBtn.clicked.connect(self.close)
-		layout.addWidget(self.cnlBtn, 0, 1)
+		layout.addWidget(self.cnlBtn, 2, 1)
 
 		self.setLayout(layout)
 		self.setWindowTitle('Adding Student')
@@ -105,6 +117,7 @@ class cam(QWidget):
 		super(cam, self).__init__(parent)
 
 		layout = QGridLayout()
+
 		self.button = QPushButton('Capture')
 		layout.addWidget(self.button, 0, 0)
 
@@ -112,8 +125,7 @@ class cam(QWidget):
 		self.setWindowTitle('Camera')
 		self.setGeometry(400, 400, 400, 250)
 
-
-
+#########################################################
 def gui():
 	app = QApplication(sys.argv)						
 	win = mainWindow()
