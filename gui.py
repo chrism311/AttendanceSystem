@@ -33,9 +33,13 @@ class mainWindow(QWidget):
 		layout.addWidget(self.addStud, 1, 2)
 
 
-		#Creates dropbox with items being the classroom directories
-		self.db = QComboBox()						
-		self.db.addItems(os.listdir("./ids/"))
+		#Creates dropbox with items being the course directories
+		self.db = QComboBox()
+		dir_list = ['--Select Course--']
+		for i in os.listdir("./ids/"):
+			dir_list.append(i)
+		self.db.addItems(dir_list)
+		self.db.activated[str].connect(self.courseVar)
 		layout.addWidget(self.db, 0, 1, 1, 2)
 
 		#Cosmetic changes to window
@@ -43,19 +47,30 @@ class mainWindow(QWidget):
 		self.setWindowTitle("Attendance System")
 		self.setGeometry(300, 300, 300, 200)
 
-	#Window to enter classroom info
+	#Assigns course selected in dropbox to variable				
+	def courseVar(self):
+		self.course = self.db.currentText()
+
+	#Window to enter course info
 	def classInfo(self):
 		class_name, ok = QInputDialog.getText(self, 'New Class', 'Class Name:')
+		self.whole_path = os.getcwd()
+		self.current_dir = self.whole_path + '/ids/' + class_name
+		os.mkdir(self.current_dir)
+	
+		if ok:
+			self.studentWindow()
 
 	#Wrapper function for student profile
 	def studentWindow(self):
-		dialog = studProfile(self)
-		dialog.show()
+		self.dialog = studProfile()
+		self.dialog.show()
+		print(self.course)
 		
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
-		self.path = './ids/'+ self.db.currentText()			
-		self.args = arguments('./model/20170512-110547/20170512-110547.pb', self.path, '1.0')
+		self.id_path = './ids/'+ self.db.currentText()			
+		self.args = arguments('./model/20170512-110547/20170512-110547.pb', self.id_path, '1.0')
 		main(self.args)
 
 #Window to create student profile
@@ -64,10 +79,41 @@ class studProfile(QWidget):
 		super(studProfile, self).__init__(parent)
 	
 		layout = QGridLayout()
-		self.button = QPushButton('button')
-		layout.addWidget(self.button, 0,0)
 
+		#'Continue' button that brings up camera
+		self.contBtn = QPushButton('Continue')
+		self.contBtn.clicked.connect(self.cont)
+		layout.addWidget(self.contBtn, 0,0)
+
+		self.cnlBtn = QPushButton('Cancel')
+		self.cnlBtn.clicked.connect(self.close)
+		layout.addWidget(self.cnlBtn, 0, 1)
+
+		self.setLayout(layout)
+		self.setWindowTitle('Adding Student')
+		self.setGeometry(300, 300, 300, 150)
 	
+	#Wrapper function for the camera window
+	def cont(self):
+		self.dialog = cam()
+		self.dialog.show()
+		self.close()
+
+#Window for the camera
+class cam(QWidget):
+	def __init__(self, parent = None):
+		super(cam, self).__init__(parent)
+
+		layout = QGridLayout()
+		self.button = QPushButton('Capture')
+		layout.addWidget(self.button, 0, 0)
+
+		self.setLayout(layout)
+		self.setWindowTitle('Camera')
+		self.setGeometry(400, 400, 400, 250)
+
+
+
 def gui():
 	app = QApplication(sys.argv)						
 	win = mainWindow()
