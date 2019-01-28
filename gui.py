@@ -56,16 +56,18 @@ class mainWindow(QWidget):
 		course_name, ok = QInputDialog.getText(self, 'New Course', 'Course Name:')
 		self.whole_path = os.getcwd()
 		self.current_dir = self.whole_path + '/ids/' + course_name
-		os.mkdir(self.current_dir)
 
 		#If 'Ok' is clicked, student window is opened to gather their info	
 		if ok:
+			os.mkdir(self.current_dir)
+			self.course = course_name
 			self.studentWindow()
 
 	#Wrapper function for student profile
 	def studentWindow(self):
 		self.dialog = studProfile()
 		self.dialog.show()
+		self.close()
 		print(self.course)
 		
 	#Wrapper function for main program with 'id' path tied to dropbox	
@@ -104,7 +106,7 @@ class studProfile(QWidget):
 		self.setLayout(layout)
 		self.setWindowTitle('Adding Student')
 		self.setGeometry(300, 300, 300, 150)
-	
+
 	#Wrapper function for the camera window
 	def cont(self):
 		self.dialog = cam()
