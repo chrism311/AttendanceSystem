@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 class mainWindow(QWidget):
 	def __init__(self, parent = None):
 		super(mainWindow, self).__init__(parent)
-
+		
 		#Establishes layouts for main window
 		layout = QGridLayout()
 
@@ -50,25 +50,28 @@ class mainWindow(QWidget):
 	#Assigns course selected in dropbox to variable				
 	def courseVar(self):
 		self.course = self.db.currentText()
+		mainWindow.current_dir = os.getcwd() + '/ids/' + self.course
 
 	#Window to enter course info
 	def courseInfo(self):
 		course_name, ok = QInputDialog.getText(self, 'New Course', 'Course Name:')
 		self.whole_path = os.getcwd()
-		self.current_dir = self.whole_path + '/ids/' + course_name
+		mainWindow.current_dir = self.whole_path + '/ids/' + course_name
 
 		#If 'Ok' is clicked, student window is opened to gather their info	
 		if ok:
-			os.mkdir(self.current_dir)
+			os.mkdir(mainWindow.current_dir)
 			self.course = course_name
 			self.studentWindow()
+			print(mainWindow.current_dir)
 
 	#Wrapper function for student profile
 	def studentWindow(self):
 		self.dialog = studProfile()
 		self.dialog.show()
-		self.close()
+
 		print(self.course)
+		print(mainWindow.current_dir)
 		
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
@@ -83,6 +86,7 @@ class studProfile(QWidget):
 	
 		layout = QGridLayout()
 
+		#Text boxes for student info
 		self.firstName = QLineEdit()
 		self.lastName = QLineEdit()
 		self.fnameLabel = QLabel()
@@ -109,9 +113,12 @@ class studProfile(QWidget):
 
 	#Wrapper function for the camera window
 	def cont(self):
+		student_dir = self.firstName.text() + ' ' + self.lastName.text()
+		os.mkdir(mainWindow.current_dir + '/' + student_dir)
 		self.dialog = cam()
 		self.dialog.show()
 		self.close()
+		print(mainWindow.current_dir)
 
 #Window for the camera
 class cam(QWidget):
