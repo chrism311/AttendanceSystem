@@ -4,7 +4,7 @@ from main import main, arguments
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 class mainWindow(QWidget):
 	def __init__(self, parent = None):
 		super(mainWindow, self).__init__(parent)
@@ -63,15 +63,17 @@ class mainWindow(QWidget):
 			os.mkdir(mainWindow.current_dir)
 			self.course = course_name
 			self.studentWindow()
-			print(mainWindow.current_dir)
+			self.db.clear()
+			self.db.addItems(os.listdir("./ids/"))
+		#	print(mainWindow.current_dir)
 
 	#Wrapper function for student profile
 	def studentWindow(self):
 		self.dialog = studProfile()
 		self.dialog.show()
 
-		print(self.course)
-		print(mainWindow.current_dir)
+		#print(self.course)
+		#print(mainWindow.current_dir)
 		
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
@@ -122,17 +124,15 @@ class studProfile(QWidget):
 
 #Window for the camera
 class cam(QWidget):
-	def __init__(self, parent = None):
+	def __init__(self, parent=None):
 		super(cam, self).__init__(parent)
 
-		layout = QGridLayout()
 
-		self.button = QPushButton('Capture')
-		layout.addWidget(self.button, 0, 0)
 
-		self.setLayout(layout)
-		self.setWindowTitle('Camera')
-		self.setGeometry(400, 400, 400, 250)
+
+
+
+
 
 #########################################################
 def gui():
