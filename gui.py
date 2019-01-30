@@ -1,10 +1,12 @@
 import sys
 import os
+import cv2
+import datetime
 from main import main, arguments
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5 import QtCore, QtGui, QtWidgets
+
 class mainWindow(QWidget):
 	def __init__(self, parent = None):
 		super(mainWindow, self).__init__(parent)
@@ -124,22 +126,60 @@ class studProfile(QWidget):
 
 #Window for the camera
 class cam(QWidget):
+	def __init__(self):
+		super().__init__()
+	
+		self.title = 'PyQt5 Video'
+		self.setWindowTitle(self.title)
+		self.setGeometry(50,50,50, 50)
+		self.resize(800, 600)
+		label = QLabel(self)
+		label.move(80, 35)
+		label.resize(640, 480)
+		self.th = Thread(self)
+		self.th.changePixmap.connect(label.setPixmap)
+		self.th.start()
+
+	def closeEvent(self, event):
+		self.th.stop()
+		QWidget.closeEvent(self, event)
+
+#Camera is under a separate thread
+class Thread(QThread):
+	changePixmap = pyqtSignal(QPixmap)
+
+	#Initiates thread
 	def __init__(self, parent=None):
-		super(cam, self).__init__(parent)
+		QThread.__init__(self, parent=parent)
+		self.isRunning = True
+	
+	#Runs camera with OpenCV
+	def run(self):
+		cap = cv2.VideoCapture(0)
+		while self.isRunning:
+			ret, frame = cap.read()
+			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)
+			convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
+			p = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+			p = frame.scaled(640, 480, Qt.KeepAspectRatio)
+			self.changePixmap.emit(p)
+
+	def stop(self):
+		self.isRunning = False
+		self.quit()
+		self.wait()
 
 
-
-
-
-
-
-
-#########################################################
+####################################################
+###################################################
 def gui():
 	app = QApplication(sys.argv)						
 	win = mainWindow()
 	win.show()
 	sys.exit(app.exec_())
 
+################################################
+##############################################
 if __name__ == '__main__':
 	gui()
