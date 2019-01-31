@@ -117,8 +117,8 @@ class studProfile(QWidget):
 
 	#Wrapper function for the camera window
 	def cont(self):
-		student_dir = self.firstName.text() + ' ' + self.lastName.text()
-		os.mkdir(mainWindow.current_dir + '/' + student_dir)
+		studProfile.student_name = self.firstName.text() + ' ' + self.lastName.text()
+		os.mkdir(mainWindow.current_dir + '/' + studProfile.student_name)
 		self.dialog = cam()
 		self.dialog.show()
 		self.close()
@@ -128,21 +128,59 @@ class studProfile(QWidget):
 class cam(QWidget):
 	def __init__(self):
 		super().__init__()
-	
-		self.title = 'PyQt5 Video'
+
+		self.i = 0
+		self.title = studProfile.student_name
 		self.setWindowTitle(self.title)
 		self.setGeometry(50,50,50, 50)
-		self.resize(800, 600)
+		self.resize(500, 350)
+		
 		label = QLabel(self)
 		label.move(80, 35)
-		label.resize(640, 480)
+		label.resize(320, 240)
+
+		#"Capture" button
+		self.cap = QPushButton(self)
+		self.cap.setText("Capture")
+		self.cap.clicked.connect(self.capture)
+		self.cap.move(200, 300)
+
+		#"Next Student" button
+		self.nxt = QPushButton(self)
+		self.nxt.setText("Next Student")
+		self.nxt.clicked.connect(self.nextStud)
+		self.nxt.move(100, 300)
+	
+		#"Close" button
+		self.cls = QPushButton(self)
+		self.cls.setText("Finish")
+		self.cls.clicked.connect(self.closeBtn)
+		self.cls.move(300, 300)
+		self.show()
+
 		self.th = Thread(self)
 		self.th.changePixmap.connect(label.setPixmap)
 		self.th.start()
 
+	#Function to capture frame from video
+	def capture(self):
+		cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(self.i), Thread.frame)
+		self.i += 1
+
+	#Brings up the student profile window again
+	def nextStud(self):
+		self.dialog = studProfile()
+		self.dialog.show()
+		self.close()
+		self.th.stop()
+
+	def closeBtn(self):
+		self.th.stop()
+		self.close()
+
+	#Stops thread due to event from red 'X' button
 	def closeEvent(self, event):
 		self.th.stop()
-		QWidget.closeEvent(self, event)
 
 #Camera is under a separate thread
 class Thread(QThread):
@@ -157,12 +195,11 @@ class Thread(QThread):
 	def run(self):
 		cap = cv2.VideoCapture(0)
 		while self.isRunning:
-			ret, frame = cap.read()
-			rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			ret, Thread.frame = cap.read()
+			rgbImage = cv2.cvtColor(Thread.frame, cv2.COLOR_BGR2RGB)
 			convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)
 			convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
-			p = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
-			p = frame.scaled(640, 480, Qt.KeepAspectRatio)
+			p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
 
 	def stop(self):
