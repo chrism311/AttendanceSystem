@@ -6,6 +6,7 @@ from main import main, arguments
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+ 
 
 class mainWindow(QWidget):
 	def __init__(self, parent = None):
@@ -37,7 +38,9 @@ class mainWindow(QWidget):
 
 		#Creates dropbox with items being the course directories
 		self.db = QComboBox()
-		dir_list = ['--Select Course--']
+		self.course = '--Select Course--'
+		dir_list = []
+		dir_list.append(self.course)
 		for i in os.listdir("./ids/"):
 			dir_list.append(i)
 		self.db.addItems(dir_list)
@@ -71,11 +74,9 @@ class mainWindow(QWidget):
 
 	#Wrapper function for student profile
 	def studentWindow(self):
-		self.dialog = studProfile()
-		self.dialog.show()
-
-		#print(self.course)
-		#print(mainWindow.current_dir)
+		if self.course != '--Select Course--':
+			self.dialog = studProfile()
+			self.dialog.show()
 		
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
@@ -95,7 +96,7 @@ class studProfile(QWidget):
 		self.lastName = QLineEdit()
 		self.fnameLabel = QLabel()
 		self.lnameLabel = QLabel()
-		self.fnameLabel.setText('First Name:')
+		self.fnameLabel.setText('First and Middle Name:')
 		self.lnameLabel.setText('Last Name:')
 		layout.addWidget(self.firstName, 0, 1)
 		layout.addWidget(self.lastName, 1, 1)
@@ -113,16 +114,17 @@ class studProfile(QWidget):
 
 		self.setLayout(layout)
 		self.setWindowTitle('Adding Student')
-		self.setGeometry(300, 300, 300, 150)
+		self.setGeometry(300, 300, 400, 150)
 
 	#Wrapper function for the camera window
 	def cont(self):
-		studProfile.student_name = self.firstName.text() + ' ' + self.lastName.text()
-		os.mkdir(mainWindow.current_dir + '/' + studProfile.student_name)
-		self.dialog = cam()
-		self.dialog.show()
-		self.close()
-		print(mainWindow.current_dir)
+		if len(self.firstName.text()) > 2:
+			if len(self.lastName.text()) > 2:	
+				studProfile.student_name = self.firstName.text() + ' ' + self.lastName.text()
+				os.mkdir(mainWindow.current_dir + '/' + studProfile.student_name)
+				self.dialog = cam()
+				self.dialog.show()
+				self.close()
 
 #Window for the camera
 class cam(QWidget):
@@ -136,28 +138,33 @@ class cam(QWidget):
 		self.resize(500, 350)
 		
 		label = QLabel(self)
-		label.move(80, 35)
+		label.move(50, 35)
 		label.resize(320, 240)
 
 		#"Capture" button
 		self.cap = QPushButton(self)
 		self.cap.setText("Capture")
 		self.cap.clicked.connect(self.capture)
-		self.cap.move(200, 300)
+		self.cap.move(185, 300)
 
 		#"Next Student" button
 		self.nxt = QPushButton(self)
 		self.nxt.setText("Next Student")
 		self.nxt.clicked.connect(self.nextStud)
-		self.nxt.move(100, 300)
+		self.nxt.move(385, 120)
 	
-		#"Close" button
+		#"Finish" button
 		self.cls = QPushButton(self)
 		self.cls.setText("Finish")
 		self.cls.clicked.connect(self.closeBtn)
-		self.cls.move(300, 300)
+		self.cls.move(395, 300)
+		
+		#QLabel for # of pics taken
+		self.cntLabel = QLabel("Picture #: {}".format(self.i), self)
+		self.cntLabel.move(395, 100)
 		self.show()
 
+		#Starts camera thread
 		self.th = Thread(self)
 		self.th.changePixmap.connect(label.setPixmap)
 		self.th.start()
@@ -166,6 +173,7 @@ class cam(QWidget):
 	def capture(self):
 		cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(self.i), Thread.frame)
 		self.i += 1
+		self.cntLabel.setText("Picture #: {}".format(self.i))
 
 	#Brings up the student profile window again
 	def nextStud(self):
