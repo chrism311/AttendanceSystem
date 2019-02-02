@@ -106,11 +106,11 @@ class studProfile(QWidget):
 		#'Continue' button that brings up camera
 		self.contBtn = QPushButton('Continue')
 		self.contBtn.clicked.connect(self.cont)
-		layout.addWidget(self.contBtn, 2,0)
+		layout.addWidget(self.contBtn, 2,1)
 
 		self.cnlBtn = QPushButton('Cancel')
 		self.cnlBtn.clicked.connect(self.close)
-		layout.addWidget(self.cnlBtn, 2, 1)
+		layout.addWidget(self.cnlBtn, 2, 0)
 
 		self.setLayout(layout)
 		self.setWindowTitle('Adding Student')
