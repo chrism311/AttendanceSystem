@@ -8,6 +8,7 @@ import detect_and_align
 import time
 import cv2
 import os
+#New branch
 
 class IdData():
     """Keeps track of known identities and calculates id matches"""
