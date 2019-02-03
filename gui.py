@@ -81,7 +81,7 @@ class mainWindow(QWidget):
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
 		self.id_path = './ids/'+ self.db.currentText()			
-		self.args = arguments('./model/20170512-110547/20170512-110547.pb', self.id_path, '1.0')
+		self.args = arguments('./model/20170512-110547.pb', self.id_path, '1.0')
 		main(self.args)
 
 #Window to create student profile
@@ -201,7 +201,8 @@ class Thread(QThread):
 	
 	#Runs camera with OpenCV
 	def run(self):
-		cap = cv2.VideoCapture(0)
+		usb_cam = "v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
+		cap = cv2.VideoCapture(usb_cam, cv2.CAP_GSTREAMER)
 		while self.isRunning:
 			ret, Thread.frame = cap.read()
 			rgbImage = cv2.cvtColor(Thread.frame, cv2.COLOR_BGR2RGB)

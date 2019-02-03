@@ -116,8 +116,8 @@ def main(args):
 
             video = 'output1.avi'
             gst_tx2 ="nvarguscamerasrc !video/x-raw(memory:NVMM), width=(int)640, height=(int)360, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
-            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)RGB ! videoconvert ! appsink"
-            cap = cv2.VideoCapture(0)
+            gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
+            cap = cv2.VideoCapture(gst_usb, cv2.CAP_GSTREAMER)
             frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
             show_landmarks = False
@@ -193,5 +193,6 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = arguments('./model/20170512-110547/20170512-110547.pb', './ids/', '1.0')
-    main(args)
+    args_2017 = arguments('./model/20170512-110547.pb', './ids/', '1.0')
+    args_2018 = arguments('./model/20180402-114759.pb', './ids/', '1.0')
+    main(args_2017)
