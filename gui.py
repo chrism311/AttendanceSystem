@@ -81,7 +81,7 @@ class mainWindow(QWidget):
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
 		self.id_path = './ids/'+ self.db.currentText()			
-		self.args = arguments('./model/20170512-110547.pb', self.id_path, '1.0')
+		self.args = arguments('./model/20170512-110547.pb', self.id_path, '.90')
 		main(self.args)
 
 #Window to create student profile
@@ -118,8 +118,8 @@ class studProfile(QWidget):
 
 	#Wrapper function for the camera window
 	def cont(self):
-		if len(self.firstName.text()) > 2:
-			if len(self.lastName.text()) > 2:	
+		if len(self.firstName.text()) >= 1:
+			if len(self.lastName.text()) >= 1:	
 				studProfile.student_name = self.firstName.text() + ' ' + self.lastName.text()
 				os.mkdir(mainWindow.current_dir + '/' + studProfile.student_name)
 				self.dialog = cam()
@@ -160,7 +160,7 @@ class cam(QWidget):
 		self.cls.move(395, 300)
 		
 		#QLabel for # of pics taken
-		self.cntLabel = QLabel("Picture #: {}".format(self.i), self)
+		self.cntLabel = QLabel("Picture #: 00", self)
 		self.cntLabel.move(395, 100)
 		self.show()
 
