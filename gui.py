@@ -2,6 +2,10 @@ import sys
 import os
 import cv2
 import datetime
+import detect_and_align
+import tensorflow as tf
+from scipy import misc
+from emb_extraction import Main, emb_args
 from main import main, arguments
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -81,8 +85,9 @@ class mainWindow(QWidget):
 	#Wrapper function for main program with 'id' path tied to dropbox	
 	def program(self):							
 		self.id_path = './ids/'+ self.db.currentText()			
-		self.args = arguments('./model/20170512-110547.pb', self.id_path, '.90')
-		main(self.args)
+		self.args_2018 = arguments('./model/20180402-114759.pb', self.id_path, '0.90') 
+		self.args_2017 = arguments('./model/20170512-110547.pb' , self.id_path, '0.90') 
+		main(self.args_2017)
 
 #Window to create student profile
 class studProfile(QWidget):
@@ -182,9 +187,14 @@ class cam(QWidget):
 		self.close()
 		self.th.stop()
 
+	def extract_emb(self):
+		embedding_args = emb_args('./model/20170512-110547.pb', mainWindow.current_dir + '/', 'embeddings', 'labels', 'labels_strings')
+		Main(embedding_args)
+
 	def closeBtn(self):
 		self.th.stop()
 		self.close()
+		self.extract_emb()
 
 	#Stops thread due to event from red 'X' button
 	def closeEvent(self, event):
