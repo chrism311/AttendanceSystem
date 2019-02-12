@@ -13,56 +13,13 @@ import os
 class IdData():
     """Keeps track of known identities and calculates id matches"""
 
-    def __init__(self, id_folder, mtcnn, sess, embeddings, images_placeholder,
+    def __init__(self, id_folder, sess, embeddings, images_placeholder,
                  phase_train_placeholder, distance_treshold):
-        print('Loading known identities: ', '\n')
+        print('Loading Embeddings: ')
         self.distance_treshold = distance_treshold
         self.id_folder = id_folder
-        self.mtcnn = mtcnn
-        self.id_names = []
-
-        image_paths = []
-        ids = os.listdir(os.path.expanduser(id_folder))
-        for id_name in ids:
-            id_dir = os.path.join(id_folder, id_name)
-            image_paths = image_paths + [os.path.join(id_dir, img) for img in os.listdir(id_dir)]
-
-        print('Found %d images in id folder' % len(image_paths))
-        aligned_images, id_image_paths = self.detect_id_faces(image_paths)
-        feed_dict = {images_placeholder: aligned_images, phase_train_placeholder: False}
-        self.embeddings = sess.run(embeddings, feed_dict=feed_dict)
-
-        if len(id_image_paths) < 5:
-            self.print_distance_table(id_image_paths)
-
-    def detect_id_faces(self, image_paths):
-        aligned_images = []
-        id_image_paths = []
-        for image_path in image_paths:
-            image = misc.imread(os.path.expanduser(image_path), mode='RGB')
-            face_patches, _, _ = detect_and_align.detect_faces(image, self.mtcnn)
-            if len(face_patches) > 1:
-                print("Warning: Found multiple faces in id image: %s" % image_path +
-                      "\nMake sure to only have one face in the id images. " +
-                      "If that's the case then it's a false positive detection and" +
-                      " you can solve it by increasing the thresolds of the cascade network")
-            aligned_images = aligned_images + face_patches
-            id_image_paths += [image_path] * len(face_patches)
-            self.id_names += [image_path.split('/')[-2]] * len(face_patches)
-
-        return np.stack(aligned_images), id_image_paths
-
-    def print_distance_table(self, id_image_paths):
-        """Prints distances between id embeddings"""
-        distance_matrix = pairwise_distances(self.embeddings, self.embeddings)
-        image_names = [path.split('/')[-1] for path in id_image_paths]
-        print('Distance matrix:\n{:20}'.format(''), '\n')
-        [print('{:20}'.format(name), '\n') for name in image_names]
-        for path, distance_row in zip(image_names, distance_matrix):
-            print('\n{:20}'.format(path), '\n')
-            for distance in distance_row:
-                print('{:20}'.format('%0.3f' % distance), '\n')
-        print()
+        self.embeddings = np.load(self.id_folder + '/' +  'embeddings.npy')
+        self.id_names = list(np.load(self.id_folder + '/' + 'labels_strings.npy'))
 
     def find_matching_ids(self, embs):
         matching_ids = []
@@ -113,7 +70,7 @@ def main(args):
             phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
 
             # Load anchor IDs
-            id_data = IdData(args.id_folder, mtcnn, sess, embeddings, images_placeholder, phase_train_placeholder, float(args.threshold))
+            id_data = IdData(args.id_folder, sess, embeddings, images_placeholder, phase_train_placeholder, float(args.threshold))
 
             video = 'output1.avi'
             gst_tx2 ="nvarguscamerasrc !video/x-raw(memory:NVMM), width=(int)640, height=(int)360, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"

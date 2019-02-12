@@ -2,7 +2,11 @@ import sys
 import os
 import cv2
 import datetime
-from main import main, arguments
+import detect_and_align
+import tensorflow as tf
+import numpy as np
+from scipy import misc
+from main import main, arguments, load_model
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -160,7 +164,7 @@ class cam(QWidget):
 		self.cls.move(395, 300)
 		
 		#QLabel for # of pics taken
-		self.cntLabel = QLabel("Picture #: {}".format(self.i), self)
+		self.cntLabel = QLabel("Picture #: 00", self)
 		self.cntLabel.move(395, 100)
 		self.show()
 
@@ -185,6 +189,7 @@ class cam(QWidget):
 	def closeBtn(self):
 		self.th.stop()
 		self.close()
+		
 
 	#Stops thread due to event from red 'X' button
 	def closeEvent(self, event):
