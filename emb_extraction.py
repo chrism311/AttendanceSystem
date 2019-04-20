@@ -62,8 +62,8 @@ def Main(args):
 
             #   export emedings and labels
 
-            np.save(args.embeddings_name, emb_array)
-            np.save(args.labels_strings_name, id_labels)
+            np.save(os.path.join(args.data_dir, args.embeddings_name), emb_array)
+            np.save(os.path.join(args.data_dir, args.labels_strings_name), id_labels)
 
 def get_image_paths(images_dir):
     image_paths = []

@@ -1,10 +1,11 @@
 import sys
 import os
 import cv2
-import datetime
+import time
 import detect_and_align
 import tensorflow as tf
 import numpy as np
+from emb_extraction import Main, emb_args
 from scipy import misc
 from main import main, arguments, load_model
 from PyQt5.QtCore import *
@@ -60,6 +61,7 @@ class mainWindow(QWidget):
 	def courseVar(self):
 		self.course = self.db.currentText()
 		mainWindow.current_dir = os.getcwd() + '/ids/' + self.course
+		mainWindow.classname = self.db.currentText()
 
 	#Window to enter course info
 	def courseInfo(self):
@@ -135,7 +137,7 @@ class cam(QWidget):
 	def __init__(self):
 		super().__init__()
 
-		self.i = 0
+		self.i = 1
 		self.title = studProfile.student_name
 		self.setWindowTitle(self.title)
 		self.setGeometry(50,50,50, 50)
@@ -164,8 +166,8 @@ class cam(QWidget):
 		self.cls.move(395, 300)
 		
 		#QLabel for # of pics taken
-		self.cntLabel = QLabel("Picture #: 00", self)
-		self.cntLabel.move(395, 100)
+		cam.cntLabel = QLabel("Time, sec: 00.00", self)
+		cam.cntLabel.move(375, 100)
 		self.show()
 
 		#Starts camera thread
@@ -173,11 +175,12 @@ class cam(QWidget):
 		self.th.changePixmap.connect(label.setPixmap)
 		self.th.start()
 
-	#Function to capture frame from video
+	#Function to start capturing frames
 	def capture(self):
-		cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(self.i), Thread.frame)
-		self.i += 1
-		self.cntLabel.setText("Picture #: {}".format(self.i))
+		Thread.i = 1
+		Thread.button_state = True
+		Thread.time_state = True
+		Thread.total_time = 0
 
 	#Brings up the student profile window again
 	def nextStud(self):
@@ -186,11 +189,15 @@ class cam(QWidget):
 		self.close()
 		self.th.stop()
 
+	def extract_emb(self):
+		embedding_args = emb_args('./model/20170512-110547.pb', mainWindow.current_dir + '/', 'embeddings', 'labels', 'labels_strings')
+		Main(embedding_args)
+
 	def closeBtn(self):
 		self.th.stop()
 		self.close()
+		self.extract_emb()
 		
-
 	#Stops thread due to event from red 'X' button
 	def closeEvent(self, event):
 		self.th.stop()
@@ -206,15 +213,34 @@ class Thread(QThread):
 	
 	#Runs camera with OpenCV
 	def run(self):
-		cap = cv2.VideoCapture(0)
+		cap = cv2.VideoCapture("/dev/video0")
+		Thread.i = 1
+		Thread.button_state = False
+		Thread.time_state = False
+		Thread.total_time = 0
 		while self.isRunning:
+			start = time.time()
 			ret, Thread.frame = cap.read()
 			rgbImage = cv2.cvtColor(Thread.frame, cv2.COLOR_BGR2RGB)
+			if Thread.button_state == True:
+				if self.i % 3 == 0:
+					cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(Thread.i), Thread.frame)
 			convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)
 			convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
 			p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
-
+			Thread.i += 1
+			end = time.time()
+			delta = end - start
+			Thread.total_time += delta
+			if Thread.time_state == True:
+				cam.cntLabel.setText("Time (s): {}".format(round(Thread.total_time, 2)))
+				if Thread.total_time > 15.01:
+					cam.cntLabel.setText("Time (s): 15.00")
+					Thread.button_state = False
+					Thread.time_state = False
+					Thread.total_time = 0
+						
 	def stop(self):
 		self.isRunning = False
 		self.quit()

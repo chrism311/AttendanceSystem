@@ -2,12 +2,15 @@ from sklearn.metrics.pairwise import pairwise_distances
 from tensorflow.python.platform import gfile
 from scipy import misc
 from collections import defaultdict
+from datetime import datetime
 import tensorflow as tf
 import numpy as np
 import detect_and_align
 import time
 import cv2
+import csv
 import os
+
 #New branch
 
 class IdData():
@@ -75,7 +78,7 @@ def main(args):
             video = 'output1.avi'
             gst_tx2 ="nvarguscamerasrc !video/x-raw(memory:NVMM), width=(int)640, height=(int)360, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
             gst_usb ="v4l2src device=/dev/video1 ! video/x-raw, width=(int)1280, height=(int)720, format=(string)RGB ! videoconvert ! appsink"
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture("/dev/video0")
             frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
             show_landmarks = False
@@ -135,7 +138,12 @@ def main(args):
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
-                    print(present.items())
+                    with open(str(args.id_folder.split('/')[-1])+'_'+str(datetime.now())+'.csv', 'w') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(['Class: '+str(args.id_folder.split('/')[-1])+'    ', 'Date and Time: '+str(datetime.now())])
+                        for i in present.keys():
+                            writer.writerow([i])
+                    f.close()
                     break
                 elif key == ord('l'):
                     show_landmarks = not show_landmarks
