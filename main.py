@@ -2,6 +2,8 @@ from sklearn.metrics.pairwise import pairwise_distances
 from tensorflow.python.platform import gfile
 from scipy import misc
 from collections import defaultdict
+from datetime import datetime
+import csv
 import tensorflow as tf
 import numpy as np
 import detect_and_align
@@ -100,8 +102,7 @@ def main(args):
 
                     for bb, landmark, matching_id, dist in zip(padded_bounding_boxes, landmarks, matching_ids, matching_distances):
                         if matching_id is None:
-                            matching_id = 'Unknown'
-                            present[matching_id] += 1
+                            matching_id = 'Unknown' 
                             print('Unknown! Couldn\'t find match.')
                         else:
                             print('Hi %s! Distance: %1.4f' % (matching_id, dist))
@@ -134,7 +135,12 @@ def main(args):
 
                 key = cv2.waitKey(1)
                 if key == ord('q'):
-                    print(present.items())
+                    with open(str(args.id_folder.split('/')[-1])+'_'+str(datetime.now())+'.csv', 'w') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(['Class: '+str(args.id_folder.split('/')[-1])+'    ', 'Date and Time: '+str(datetime.now())])
+                        for i in present.keys():
+                            writer.writerow([i])
+                    f.close()
                     break
                 elif key == ord('l'):
                     show_landmarks = not show_landmarks

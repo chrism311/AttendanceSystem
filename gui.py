@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 import sys
 import os
 import cv2
 import datetime
 import detect_and_align
 import tensorflow as tf
+import time
 from scipy import misc
 from emb_extraction import Main, emb_args
 from main import main, arguments
@@ -136,7 +138,7 @@ class cam(QWidget):
 	def __init__(self):
 		super().__init__()
 
-		self.i = 0
+		self.i = 1
 		self.title = studProfile.student_name
 		self.setWindowTitle(self.title)
 		self.setGeometry(50,50,50, 50)
@@ -150,13 +152,19 @@ class cam(QWidget):
 		self.cap = QPushButton(self)
 		self.cap.setText("Capture")
 		self.cap.clicked.connect(self.capture)
-		self.cap.move(185, 300)
+		self.cap.move(100, 300)
+
+		#"Stop" button
+		self.cap = QPushButton(self)
+		self.cap.setText("Stop Capture")
+		self.cap.clicked.connect(self.stop_capture)
+		self.cap.move(200, 300)
 
 		#"Next Student" button
 		self.nxt = QPushButton(self)
 		self.nxt.setText("Next Student")
 		self.nxt.clicked.connect(self.nextStud)
-		self.nxt.move(385, 120)
+		self.nxt.move(375, 120)
 	
 		#"Finish" button
 		self.cls = QPushButton(self)
@@ -165,8 +173,8 @@ class cam(QWidget):
 		self.cls.move(395, 300)
 		
 		#QLabel for # of pics taken
-		self.cntLabel = QLabel("Picture #: 00", self)
-		self.cntLabel.move(395, 100)
+		cam.cntLabel = QLabel("Device is ready.", self)
+		cam.cntLabel.move(385, 100)
 		self.show()
 
 		#Starts camera thread
@@ -174,11 +182,15 @@ class cam(QWidget):
 		self.th.changePixmap.connect(label.setPixmap)
 		self.th.start()
 
-	#Function to capture frame from video
+	#Function to start capturing frames from video
 	def capture(self):
-		cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(self.i), Thread.frame)
-		self.i += 1
-		self.cntLabel.setText("Picture #: {}".format(self.i))
+		cam.button_state = True
+		cam.cntLabel.setText("Capturing...")
+
+	#Function to stop capturing frames from video
+	def stop_capture(self):
+		cam.button_state = False
+		cam.cntLabel.setText("Stopped")
 
 	#Brings up the student profile window again
 	def nextStud(self):
@@ -213,13 +225,21 @@ class Thread(QThread):
 	def run(self):
 		usb_cam = "v4l2src device=/dev/video1 ! video/x-raw, width=(int)320, height=(int)240, format=(string)RGB ! videoconvert ! appsink"
 		cap = cv2.VideoCapture(usb_cam, cv2.CAP_GSTREAMER)
+		self.i = 1
+		cam.button_state = False
+		count = 1
 		while self.isRunning:
 			ret, Thread.frame = cap.read()
 			rgbImage = cv2.cvtColor(Thread.frame, cv2.COLOR_BGR2RGB)
+			if cam.button_state == True:
+				if count % 30 == 0:
+					cv2.imwrite(mainWindow.current_dir + '/' + studProfile.student_name + '/' + 'pic{}.png'.format(self.i), Thread.frame) 
 			convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)
 			convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
 			p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
 			self.changePixmap.emit(p)
+			self.i += 1
+			count += 1
 
 	def stop(self):
 		self.isRunning = False
